@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import marquez.common.models.DatasetUrn;
-import marquez.common.models.Namespace;
 import marquez.db.mappers.DatasetRowMapper;
 import marquez.db.models.DataSourceRow;
 import marquez.db.models.DatasetRow;
@@ -57,9 +56,14 @@ public interface DatasetDao {
   @SqlQuery("SELECT * FROM datasets WHERE urn = :urn.value")
   Optional<DatasetRow> findBy(@BindBean("urn") DatasetUrn urn);
 
-  @SqlQuery("SELECT * FROM datasets LIMIT :limit OFFSET :offset")
+  @SqlQuery(
+      "SELECT * "
+          + "FROM datasets d "
+          + "INNER JOIN namespaces n "
+          + "     ON (n.guid = d.namespace_guid AND n.name=:namespace)"
+          + "LIMIT :limit OFFSET :offset")
   List<DatasetRow> findAll(
-      @Bind("namespace") Namespace namespace,
+      @Bind("namespace") String namespace,
       @Bind("limit") Integer limit,
       @Bind("offset") Integer offset);
 }
